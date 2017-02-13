@@ -5,7 +5,7 @@ import { Article } from './article';
 // Pass in each article into app-article
 @Component({
   selector: 'app-root',
-  template: './app.component.html'
+  templateUrl: './app.component.html'
 })
 export class AppComponent {
   // Article model
@@ -31,5 +31,4 @@ export class AppComponent {
 
     ];
   }
-
 }
