@@ -7,6 +7,8 @@ import { Article } from '../article';
   templateUrl: './article-list.component.html',
   styleUrls: ['./article-list.component.css']
 })
+
+// Implements ngOnInit()
 export class ArticleListComponent implements
 OnInit {
   private articles: Article[];
@@ -15,7 +17,8 @@ OnInit {
     private articleService: ArticleService
   ) { }
 
-  // Heavy lifting done in OnInit callback
+  // Life cycle hook
+  // Heavy lifting done in ngnInit callback
   ngOnInit() {
     this.articleService
       .getArticles()

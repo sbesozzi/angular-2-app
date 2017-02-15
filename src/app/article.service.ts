@@ -3,14 +3,12 @@ import { Http, URLSearchParams } from '@angular/http';
 import 'rxjs/add/operator/toPromise';
 
 import { Article } from './article';
-
-// Variable url
-const baseUrl = 'https://newsapi.org';
-const newsApiKey = '3a4c40248f834994a88c5f4e8af02c63';
+import { environment } from '../environments/environment';
 
 @Injectable()
 export class ArticleService {
 
+  // Local instance of http service
   constructor(
     private http: Http
   ) { }
@@ -19,24 +17,30 @@ export class ArticleService {
   public getArticles(): Promise<Article[]> {
     let params = new URLSearchParams();
 
-    params.set('apiKey', newsApiKey);
+    // Set param, value required by Reddit
+    params.set('apiKey', environment.newsApiKey);
     params.set('source', 'reddit-r-all');
 
     return this.http
       //.get(baseUrl + '/v1/articles')
-      .get(`${baseUrl}/v1/articles`, {
+      // ES6 string interpelation syntax
+      .get(`${environment.baseUrl}/v1/articles`, {
         search: params
       })
+      // Imported from rxjs
       .toPromise()
-      .then(resp => resp.json())
-      .then(json => {
-        console.log('json', json);
-        return json;
+      // Response as json
+      // Return list of article objects
+      .then(res => res.json())
+      .then(json => json.articles)
+      .then(articles => {
+        console.log('json', articles);
+        // Create new article objects/Return only title & description
+        return articles
+          .map(article => Article.fromJSON(article));
       })
       .catch(err => {
         console.log('We got an error', err);
       });
-
   }
-
 }
