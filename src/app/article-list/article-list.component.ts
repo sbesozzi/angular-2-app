@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { ArticleService } from '../article.service';
 import { Article } from '../article';
 
@@ -9,19 +10,19 @@ import { Article } from '../article';
 })
 
 // Implements ngOnInit()
-export class ArticleListComponent implements
-OnInit {
-  private articles: Article[];
+export class ArticleListComponent implements OnInit {
+  private articles: Observable<Article[]>;
 
   constructor(
     private articleService: ArticleService
-  ) { }
+  ) {
+    this.articles = 
+    articleService.orderedArticles;
+  }
 
   // Life cycle hook
   // Heavy lifting done in ngnInit callback
   ngOnInit() {
-    this.articleService
-      .getArticles()
-      .then(articles => this.articles = articles);
+    this.articleService.getArticles();
   }
 }

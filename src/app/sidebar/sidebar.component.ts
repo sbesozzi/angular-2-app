@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ArticleService } from '../article.service';
+import { Observable } from 'rxjs';
+
 
 @Component({
   selector: 'app-sidebar',
@@ -6,8 +9,11 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
+  private sources: Observable<any>;
 
-  constructor() { }
+  constructor(
+    private articleService: ArticleService
+  ) {  }
 
   ngOnInit() {
   }
