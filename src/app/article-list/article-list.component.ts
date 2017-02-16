@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { ArticleService } from '../article.service';
 import { Article } from '../article';
 
@@ -14,15 +15,19 @@ export class ArticleListComponent implements OnInit {
   private articles: Observable<Article[]>;
 
   constructor(
-    private articleService: ArticleService
+    private articleService: ArticleService,
+    private activeRoute: ActivatedRoute
   ) {
-    this.articles = 
+    this.articles =
     articleService.orderedArticles;
   }
 
   // Life cycle hook
   // Heavy lifting done in ngnInit callback
   ngOnInit() {
-    this.articleService.getArticles();
+    this.activeRoute.params.subscribe(params => {
+      const sourceKey = params['sourceKey'];
+      this.articleService.updateArticles(sourceKey);
+    })
   }
 }

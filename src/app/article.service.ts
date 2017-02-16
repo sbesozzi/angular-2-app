@@ -34,22 +34,27 @@ const sortFns = {
 
 @Injectable()
 export class ArticleService {
-  // Initial value empty array
+  // Initial value as empty array
   private _articles: BehaviorSubject<Article[]> =
     new BehaviorSubject<Article[]>([]);
-
+  private _sources: BehaviorSubject<any> =
+    new BehaviorSubject<any>([]);
+  private _refreshSubject: BehaviorSubject<string> = new
+    BehaviorSubject<string>('reddit-r-all');
   private _sortByDirectionSubject:
-  BehaviorSubject<number> = new
-  BehaviorSubject<number>(1);
+    BehaviorSubject<number> = new
+    BehaviorSubject<number>(1);
   private _sortByFilterSubject:
-  BehaviorSubject<ArticleSortOrderFn> = new
-  BehaviorSubject<ArticleSortOrderFn>(sortByTime);
+    BehaviorSubject<ArticleSortOrderFn> = new
+    BehaviorSubject<ArticleSortOrderFn>(sortByTime);
 
   private _filterBySubject:
-  BehaviorSubject<string> = new
-  BehaviorSubject<string>('');
+    BehaviorSubject<string> = new
+    BehaviorSubject<string>('');
 
-  // Instance value of articles acts as Observable
+
+  // Instance value of attribute acts as Observable
+  public sources: Observable<any> = this._sources.asObservable();
   public articles: Observable<Article[]> = this._articles.asObservable();
   public orderedArticles: Observable<Article[]>;
 
@@ -57,6 +62,10 @@ export class ArticleService {
   constructor(
     private http: Http
   ) {
+    // Setup subscription to getArticles
+    this._refreshSubject
+        .subscribe(this.getArticles.bind(this));
+
     this.orderedArticles =
       Observable.combineLatest(
         this._articles,
@@ -87,9 +96,13 @@ export class ArticleService {
 
   // Make http request return Observable
   // Convert response into article class
-  // Update our subject
-  public getArticles(): void {
-    this._makeHttpRequest('/v1/articles', 'reddit-r-all')
+  // Update our BehaviorSubject
+  public updateArticles(sourceKey): void {
+    this._refreshSubject.next(sourceKey);
+  }
+
+  public getArticles(sourceKey = 'reddit-r-all'): void {
+    this._makeHttpRequest('/v1/articles', sourceKey)
         .map(json => json.articles)
         .subscribe(articlesJSON => {
           const articles = articlesJSON
@@ -98,13 +111,24 @@ export class ArticleService {
       });
   }
 
+  public getSources(): void {
+    this._makeHttpRequest('/v1/sources')
+        .map(json => json.sources)
+        .filter(list => list.length > 0)
+        .subscribe(this._sources);
+  }
+
   private _makeHttpRequest(
     path: string,
-    sourceKey: string
+    sourceKey?: string
   ): Observable<any> {
     let params = new URLSearchParams();
+
     params.set('apiKey', environment.newsApiKey);
-    params.set('source', sourceKey);
+    // Optional sourceKey check
+    if (sourceKey && sourceKey !== '') {
+      params.set('source', sourceKey);
+    }
 
     return this.http
       //.get(baseUrl + '/v1/articles')
@@ -112,5 +136,6 @@ export class ArticleService {
       .get(`${environment.baseUrl}${path}`, {
         search: params
       }).map(res => res.json());
+
   }
 }

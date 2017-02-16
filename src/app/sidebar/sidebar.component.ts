@@ -11,11 +11,15 @@ import { Observable } from 'rxjs';
 export class SidebarComponent implements OnInit {
   private sources: Observable<any>;
 
+  // Dependency injection
   constructor(
     private articleService: ArticleService
-  ) {  }
+  ) {
+    this.sources = this.articleService.sources;
+  }
 
   ngOnInit() {
+    this.articleService.getSources();
   }
 
 }
